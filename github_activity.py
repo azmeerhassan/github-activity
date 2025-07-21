@@ -7,17 +7,30 @@ def fetch_github_activity(username):
 
     try:
         with urllib.request.urlopen(url) as response:
+            if response.status == 204:
+                print("⚠️ No content returned from GitHub.")
+                return []
+
             data = response.read()
             events = json.loads(data)
             return events
+
     except urllib.error.HTTPError as e:
-        print(f"❌ HTTP Error: {e.code} - {e.reason}")
+        if e.code == 404:
+            print("❌ User not found. Please check the username.")
+        elif e.code == 403:
+            print("⛔ Rate limit exceeded. Please try again later.")
+        else:
+            print(f"❌ HTTP Error {e.code}: {e.reason}")
     except urllib.error.URLError as e:
-        print(f"❌ URL Error: {e.reason}")
+        print(f"📡 Network Error: {e.reason}")
+    except json.JSONDecodeError:
+        print("❌ Failed to decode the JSON response.")
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
-    
+        print(f"⚠️ Unexpected Error: {e}")
+
     return []
+
 
 def main():
     if len(sys.argv) < 2:
