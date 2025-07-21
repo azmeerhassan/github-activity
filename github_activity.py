@@ -28,7 +28,40 @@ def main():
     print(f"📡 Fetching activity for GitHub user: {username}...")
 
     events = fetch_github_activity(username)
-    print(f"✅ Total events fetched: {len(events)}")
+    if not events:
+        print("😕 No public activity found or an error occurred.")
+        return
+
+    print("📋 Recent Activity:")
+    for event in events:
+        type = event["type"]
+        repo = event["repo"]["name"]
+
+        if type == "PushEvent":
+            commits = event["payload"]["commits"]
+            print(f"📌 Pushed {len(commits)} commit(s) to {repo}")
+
+        elif type == "IssuesEvent":
+            action = event["payload"]["action"]
+            print(f"🐛 {action.capitalize()} issue in {repo}")
+
+        elif type == "IssueCommentEvent":
+            print(f"💬 Commented on issue in {repo}")
+
+        elif type == "WatchEvent":
+            print(f"⭐ Starred {repo}")
+
+        elif type == "PullRequestEvent":
+            action = event["payload"]["action"]
+            print(f"🔀 {action.capitalize()} pull request in {repo}")
+
+        elif type == "CreateEvent":
+            ref_type = event["payload"]["ref_type"]
+            print(f"📁 Created new {ref_type} in {repo}")
+
+        else:
+            print(f"📦 {type} in {repo}")
+
 
 if __name__ == "__main__":
     main()
